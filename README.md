@@ -1,5 +1,7 @@
 # Running Apps Widget
 
+NOT TESTED ON HYPRLAND WORKS FINE IN NIRI.
+
 A Ryoku shell plugin (`running-apps-widget`) for the `topbarGlyph` host. It shows one
 icon for every app you have open, lights the focused app, and opens a panel that
 lists them all.
