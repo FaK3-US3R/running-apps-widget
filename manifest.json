@@ -1,0 +1,75 @@
+{
+  "id": "running-apps-widget",
+  "name": "Running Apps Widget",
+  "version": "0.4.0",
+  "author": "fake-user",
+  "description": "Shows an icon for every app you have open, lights the focused one, and lists them all in a panel. Click an icon to focus that app. Hides when no app is open. Hover shows the app name; thumbnails are an opt-in setting. Apps that closed their window but still run in the background stay as faded ghosts.",
+  "license": "MIT",
+  "official": false,
+  "hosts": [
+    "topbarGlyph"
+  ],
+  "entryPoints": {
+    "main": "service/Main.qml",
+    "content": "content/Widget.qml",
+    "panel": "content/Panel.qml"
+  },
+  "panel": {
+    "width": 320
+  },
+  "files": [],
+  "capabilities": {
+    "densities": [
+      "glyph"
+    ]
+  },
+  "defaults": {
+    "host": "topbarGlyph",
+    "icon": "apps",
+    "label": "Running Apps",
+    "bar": {
+      "section": "left"
+    }
+  },
+  "dependencies": {
+    "commands": [
+      "niri",
+      "hyprctl",
+      "ps"
+    ]
+  },
+  "metadata": {
+    "settings": [
+      {
+        "key": "maxIcons",
+        "type": "int",
+        "label": "Most icons shown on the bar",
+        "group": "Running Apps Widget",
+        "default": 8,
+        "min": 1,
+        "max": 12
+      },
+      {
+        "key": "showIndicators",
+        "type": "toggle",
+        "label": "Show a running indicator under each icon",
+        "group": "Running Apps Widget",
+        "default": true
+      },
+      {
+        "key": "showThumbnails",
+        "type": "toggle",
+        "label": "Enable thumbnail preview on hover and in the panel",
+        "group": "Running Apps Widget",
+        "default": false
+      },
+      {
+        "key": "showGhosts",
+        "type": "toggle",
+        "label": "Show faded ghosts for apps running without a window",
+        "group": "Running Apps Widget",
+        "default": true
+      }
+    ]
+  }
+}
