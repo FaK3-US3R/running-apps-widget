@@ -21,6 +21,9 @@ Item {
     readonly property var ids: service ? service.displayIds : []
     readonly property int windows: service ? service.totalWindows : 0
     readonly property int ghosts: service ? service.ghostCount : 0
+    readonly property var monitors: service ? service.monitors : []
+    readonly property int monitorCount: monitors.length
+    readonly property var colorPresets: ["#7aa2f7", "#9ece6a", "#e0af68", "#bb9af7", "#f7768e", "#73daca", "#2ac3de", "#ff9e64", "#c0caf5", "#f7768e"]
 
     // previews are on but the compositor delivers no frame: say so
     property bool thumbNote: false
@@ -75,6 +78,123 @@ Item {
             color: Theme.hair
         }
 
+        // ---- monitor colors ----
+        Column {
+            width: root.width
+            spacing: 6 * root.s
+            visible: root.service ? root.service.useMonitorColors : true
+
+            Item {
+                width: root.width
+                height: 13 * root.s
+                MicroLabel {
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    label: root.monitorCount > 0
+                        ? ("Monitor indicator colors · " + root.monitorCount + " detected")
+                        : "Monitor indicator colors"
+                    s: root.s
+                }
+            }
+
+            Text {
+                visible: root.monitorCount === 0
+                width: root.width
+                text: "No monitors detected yet. Open on niri or Hyprland to detect monitors."
+                wrapMode: Text.Wrap
+                color: Theme.faint
+                font.family: Theme.font
+                font.pixelSize: 10.5 * root.s
+            }
+
+            Repeater {
+                model: root.monitors
+                delegate: Item {
+                    id: monRow
+                    required property var modelData
+                    required property int index
+                    readonly property string monName: String(modelData && modelData.name ? modelData.name : "")
+                    readonly property int slot: Number(modelData && modelData.index ? modelData.index : (index + 1))
+                    readonly property string currentColor: root.service ? root.service.monitorColorAt(monRow.slot) : "#7aa2f7"
+                    width: root.width
+                    height: monCol.implicitHeight
+
+                    Column {
+                        id: monCol
+                        width: parent.width
+                        spacing: 4 * root.s
+
+                        Row {
+                            width: parent.width
+                            spacing: 8 * root.s
+                            Rectangle {
+                                width: 10 * root.s
+                                height: 10 * root.s
+                                radius: 5 * root.s
+                                anchors.verticalCenter: parent.verticalCenter
+                                color: monRow.currentColor
+                                border.width: 1
+                                border.color: Theme.hair
+                            }
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width - 18 * root.s - 64 * root.s
+                                text: monRow.slot + ". " + monRow.monName
+                                elide: Text.ElideRight
+                                color: Theme.bright
+                                font.family: Theme.mono
+                                font.pixelSize: 11 * root.s
+                            }
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 64 * root.s
+                                horizontalAlignment: Text.AlignRight
+                                text: monRow.currentColor
+                                color: Theme.dim
+                                font.family: Theme.mono
+                                font.pixelSize: 10 * root.s
+                            }
+                        }
+
+                        Flow {
+                            width: parent.width
+                            spacing: 4 * root.s
+                            Repeater {
+                                model: root.colorPresets
+                                delegate: Rectangle {
+                                    required property string modelData
+                                    width: 18 * root.s
+                                    height: 18 * root.s
+                                    radius: 4 * root.s
+                                    color: modelData
+                                    border.width: String(modelData).toLowerCase() === String(monRow.currentColor).toLowerCase() ? 2 : 1
+                                    border.color: String(modelData).toLowerCase() === String(monRow.currentColor).toLowerCase() ? Theme.bright : Theme.hair
+                                    scale: presetMa.pressed ? 0.92 : 1.0
+                                    Behavior on scale { NumberAnimation { duration: 80 } }
+                                    MouseArea {
+                                        id: presetMa
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            if (root.pluginApi)
+                                                root.pluginApi.saveSetting("monitorColor" + monRow.slot, modelData);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            visible: root.service ? root.service.useMonitorColors : true
+            width: root.width
+            height: 1
+            color: Theme.hair
+        }
+
         // ---- the apps (scrolls when there are many) ----
         Flickable {
             id: flick
@@ -124,6 +244,17 @@ Item {
                         readonly property bool thumbWanted: root.service
                             ? (root.service.showThumbnails && root.visible && rowI.capture !== null)
                             : false
+                        readonly property color rowIndicatorColor: {
+                            if (!root.service) return Theme.accent;
+                            void root.service.rev;
+                            const c = root.service.indicatorColorFor(rowI.appId);
+                            return (c && c !== "") ? c : Theme.accent;
+                        }
+                        readonly property string rowMonitor: {
+                            if (!root.service) return "";
+                            void root.service.rev;
+                            return root.service.monitorOf(rowI.appId);
+                        }
 
                         width: list.width
                         height: 40 * root.s
@@ -239,7 +370,8 @@ Item {
                                 width: 6 * root.s
                                 height: width
                                 radius: width / 2
-                                color: (rowI.focused && !rowI.ghost) ? Theme.accent : "transparent"
+                                color: rowI.ghost ? "transparent" : rowI.rowIndicatorColor
+                                opacity: rowI.focused ? 1.0 : 0.55
                                 border.width: rowI.ghost ? 1 : 0
                                 border.color: Theme.dim
                             }

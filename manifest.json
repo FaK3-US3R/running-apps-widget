@@ -1,9 +1,9 @@
 {
   "id": "running-apps-widget",
   "name": "Running Apps Widget",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "author": "fake-user",
-  "description": "Shows an icon for every app you have open, lights the focused one, and lists them all in a panel. Click an icon to focus that app. Hides when no app is open. Hover shows the app name; thumbnails are an opt-in setting. Apps that closed their window but still run in the background stay as faded ghosts.",
+  "description": "Shows an icon for every app you have open, lights the focused one, and lists them all in a panel. Click an icon to focus that app. Hides when no app is open. Hover shows the app name; thumbnails are an opt-in setting. Apps that closed their window but still run in the background stay as faded ghosts. Running indicators can be colored by the monitor where the app is open.",
   "license": "MIT",
   "official": false,
   "hosts": [
@@ -57,6 +57,13 @@
         "default": true
       },
       {
+        "key": "useMonitorColors",
+        "type": "toggle",
+        "label": "Color running indicator by monitor",
+        "group": "Running Apps Widget",
+        "default": true
+      },
+      {
         "key": "showThumbnails",
         "type": "toggle",
         "label": "Enable thumbnail preview on hover and in the panel",
@@ -69,6 +76,48 @@
         "label": "Show faded ghosts for apps running without a window",
         "group": "Running Apps Widget",
         "default": true
+      },
+      {
+        "key": "monitorColor1",
+        "type": "text",
+        "label": "Monitor 1 indicator color (hex)",
+        "group": "Monitor Colors",
+        "default": "#7aa2f7"
+      },
+      {
+        "key": "monitorColor2",
+        "type": "text",
+        "label": "Monitor 2 indicator color (hex)",
+        "group": "Monitor Colors",
+        "default": "#9ece6a"
+      },
+      {
+        "key": "monitorColor3",
+        "type": "text",
+        "label": "Monitor 3 indicator color (hex)",
+        "group": "Monitor Colors",
+        "default": "#e0af68"
+      },
+      {
+        "key": "monitorColor4",
+        "type": "text",
+        "label": "Monitor 4 indicator color (hex)",
+        "group": "Monitor Colors",
+        "default": "#bb9af7"
+      },
+      {
+        "key": "monitorColor5",
+        "type": "text",
+        "label": "Monitor 5 indicator color (hex)",
+        "group": "Monitor Colors",
+        "default": "#f7768e"
+      },
+      {
+        "key": "monitorColor6",
+        "type": "text",
+        "label": "Monitor 6 indicator color (hex)",
+        "group": "Monitor Colors",
+        "default": "#73daca"
       }
     ]
   }

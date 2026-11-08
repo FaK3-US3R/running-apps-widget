@@ -99,6 +99,23 @@ Item {
                     ? root.service.labelOf(cell.appId).charAt(0).toUpperCase() : "?"
                 // a ghost: no window, process still running (faded, breathing)
                 readonly property bool ghost: root.service ? root.service.isGhost(cell.appId) : false
+                readonly property string monitorName: {
+                    if (!root.service) return "";
+                    void root.service.rev;
+                    return root.service.monitorOf(cell.appId);
+                }
+                readonly property color indicatorColor: {
+                    if (!root.service) return Theme.accent;
+                    void root.service.rev;
+                    const c = root.service.indicatorColorFor(cell.appId);
+                    return (c && c !== "") ? c : Theme.accent;
+                }
+                readonly property color indicatorDotColor: {
+                    if (!root.service) return Theme.dim;
+                    void root.service.rev;
+                    const c = root.service.indicatorColorFor(cell.appId);
+                    return (c && c !== "") ? c : Theme.dim;
+                }
                 property real pulse: 0.45
                 property bool thumbMissing: false
 
@@ -200,7 +217,8 @@ Item {
                         width: 12 * root.s
                         height: 3 * root.s
                         radius: 1.5 * root.s
-                        color: Theme.accent
+                        color: cell.indicatorColor
+                        Behavior on color { ColorAnimation { duration: Motion.fast } }
                     }
                     Repeater {
                         model: (cell.focused || cell.ghost) ? 0 : Math.min(cell.count, 3)
@@ -208,7 +226,8 @@ Item {
                             width: 3 * root.s
                             height: 3 * root.s
                             radius: 1.5 * root.s
-                            color: Theme.dim
+                            color: cell.indicatorDotColor
+                            Behavior on color { ColorAnimation { duration: Motion.fast } }
                         }
                     }
                 }
@@ -298,6 +317,23 @@ Item {
                             color: Theme.dim
                             font.family: Theme.mono
                             font.pixelSize: 10.5 * root.s
+                        }
+                        Row {
+                            visible: cell.monitorName !== "" && !cell.ghost
+                            spacing: 6 * root.s
+                            Rectangle {
+                                width: 8 * root.s
+                                height: 8 * root.s
+                                radius: 4 * root.s
+                                anchors.verticalCenter: parent.verticalCenter
+                                color: cell.indicatorColor
+                            }
+                            Text {
+                                text: cell.monitorName
+                                color: Theme.dim
+                                font.family: Theme.mono
+                                font.pixelSize: 10.5 * root.s
+                            }
                         }
                         Text {
                             visible: cell.ghost

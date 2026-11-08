@@ -36,31 +36,44 @@ lists them all.
   through the Wayland toplevel protocol (`Quickshell.Wayland`), and the installed
   desktop entries (`Quickshell` `DesktopEntries`) to find each app's name and icon.
   Settings are read through `pluginApi.pluginSettings` behind a default.
-- **Which process owns each window (for ghosts):** while an app has windows, the
-  compositor is asked for each window's process id with `niri msg --json windows`
-  (or `hyprctl clients -j` on Hyprland). When an app's last window closes and a short
-  grace period passes, `ps -o pid=,stat= -p <pids>` checks whether those same
-  processes are still alive. All of it is read-only.
+- **Which process owns each window (for ghosts) and which monitor it is on:**
+  the compositor is queried with `niri msg --json windows` plus
+  `niri msg --json workspaces`/`outputs` (or `hyprctl clients -j` and
+  `hyprctl monitors -j` on Hyprland) to learn each window's process id and
+  monitor. The running indicator can adapt its color to the monitor the app's
+  representative window (focused, else first) is open on. When an app's last
+  window closes and a short grace period passes, `ps -o pid=,stat= -p <pids>`
+  checks whether those same processes are still alive. All of it is read-only.
 - **Window thumbnails (opt-in, off by default):** only when "Enable thumbnail
   preview" is on, the plugin asks the compositor for a live capture of an app's
   window through `Quickshell.Wayland` (`ScreencopyView`). The capture runs only
   while the hover card or the panel is showing, is drawn on screen and is never
   stored or sent anywhere.
-- **Writes:** nothing. No files, no settings except the ones you change in
-  Add-ons.
-- **Runs:** the three read-only commands above (`niri`, `hyprctl`, `ps`), all
+- **Writes:** settings you change in Add-ons or the panel's monitor color chooser
+  are saved through `pluginApi.saveSetting` (no direct config file edits). No
+  other files are written.
+- **Runs:** read-only compositor/process commands (`niri msg --json windows`,
+  `workspaces`, `outputs`, or `hyprctl clients -j`/`monitors -j`, and `ps`), all
   declared in `dependencies.commands`. Clicking a ghost runs that app's own
   desktop-entry launcher (`DesktopEntry.execute()`), the same as starting it from
   a menu. No network, no privileged actions.
 
 ## Settings
 
-| key            | type   | default | description                              |
-| -------------- | ------ | ------- | ---------------------------------------- |
-| maxIcons       | int    | 8       | Most icons shown on the bar (1 to 12)    |
-| showIndicators | toggle | true    | Show a running indicator under each icon |
-| showThumbnails | toggle | false   | Enable thumbnail preview on hover and in the panel |
-| showGhosts     | toggle | true    | Show faded ghosts for apps running without a window |
+| key             | type   | default | description                              |
+| --------------- | ------ | ------- | ---------------------------------------- |
+| maxIcons        | int    | 8       | Most icons shown on the bar (1 to 12)    |
+| showIndicators  | toggle | true    | Show a running indicator under each icon |
+| useMonitorColors| toggle | true    | Color the running indicator by the monitor the app is on |
+| showThumbnails  | toggle | false   | Enable thumbnail preview on hover and in the panel |
+| showGhosts      | toggle | true    | Show faded ghosts for apps running without a window |
+| monitorColor1-6 | text   | (preset hex) | Indicator color (hex) for detected monitor slots 1-6 |
+
+Monitor detection runs on niri and Hyprland. The panel shows detected monitors and
+color chooser slots for each one; choosing a preset saves that monitor's indicator
+color via `pluginApi.saveSetting`. If an app has windows on more than one monitor,
+the indicator follows the app's representative window (the focused window, or the
+first).
 
 The bar also limits the icons to the width it gives the widget; apps that do not
 fit are reachable from the `+N` chip and the panel.
